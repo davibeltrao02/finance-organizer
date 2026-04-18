@@ -11,6 +11,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import Link from "next/link";
 
 const COLORS = [
   "#6366f1",
@@ -33,8 +34,14 @@ export default function DashboardPage() {
 
   return (
     <main className="p-8 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+      <Link
+        href="/transactions/"
+        className="mb-4 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        Transações
+      </Link>
 
+      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
       {/* Cards de resumo */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         <Card>

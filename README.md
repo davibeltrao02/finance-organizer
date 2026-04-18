@@ -69,4 +69,4 @@ curl "https://api.telegram.org/bot{TOKEN}/setWebhook?url=https://sua-url.ngrok.i
 
 ## Documentação
 
-Veja a pasta [`docs/`](docs/) para o roadmap detalhado de cada fase do projeto.
+Veja a pasta [`.docs/`](.docs/) para o roadmap detalhado de cada fase do projeto.
