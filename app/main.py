@@ -1,6 +1,10 @@
+import logging
 from fastapi import FastAPI
+
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import chat, transactions, summary, webhook
+from app.routers import transactions, summary, webhook
+
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(
     title="Finance Organizer API",
@@ -17,7 +21,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(chat.router)
 app.include_router(transactions.router)
 app.include_router(summary.router)
 app.include_router(webhook.router)

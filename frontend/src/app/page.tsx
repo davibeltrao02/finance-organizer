@@ -24,12 +24,14 @@ const COLORS = [
 ];
 
 export default function DashboardPage() {
+  const now = new Date();
+
   const [balance, setBalance] = useState<Balance | null>(null);
   const [categories, setCategories] = useState<CategoryTotal[]>([]);
 
   useEffect(() => {
     getBalance().then(setBalance);
-    getByCategory().then(setCategories);
+    getByCategory(now.getFullYear(), now.getMonth() + 1).then(setCategories);
   }, []);
 
   return (

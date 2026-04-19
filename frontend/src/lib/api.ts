@@ -37,8 +37,8 @@ export async function getBalance(): Promise<Balance> {
   return res.json();
 }
 
-export async function getByCategory(): Promise<CategoryTotal[]> {
-  const res = await fetch(`${API_URL}/summary/by-category`);
+export async function getByCategory(year: number, month: number): Promise<CategoryTotal[]> {
+  const res = await fetch(`${API_URL}/summary/by-category?year=${year}&month=${month}`);
   return res.json();
 }
 
