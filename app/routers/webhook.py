@@ -18,9 +18,13 @@ def receive_telegram_message(payload: TelegramPayload, db: Session = Depends(get
     chat_id = payload.message.chat.id
     text = payload.message.text
 
-    # Processa a mensagem com IA (sem histórico para simplificar)
+    if not text:
+        return {"ok": True}
+
+    if chat_id not in [int(allowed) for allowed in os.getenv("TELEGRAM_ALLOWED_CHAT_IDS", "0").split(";") if allowed]:
+        return {"ok": True}
+
     history = load_history(db)
-    
     reply, extracted = process_message(text, history)
 
     # Salva a troca no histórico

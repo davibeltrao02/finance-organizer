@@ -1,4 +1,5 @@
 import json
+import re
 import os
 from typing import Optional, Tuple, List
 from datetime import date
@@ -80,14 +81,14 @@ def process_message(
 
     print("Resposta bruta do Groq:", response)
 
-    # Limpa o texto da resposta (remove markdown code blocks se houver)
-    raw = response.choices[0].message.content.strip()
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
+    raw = response.choices[0].message.content or ""
 
-    data = json.loads(raw.strip())
+    # Extrai JSON da resposta — o modelo às vezes adiciona texto antes/depois
+    match = re.search(r'\{.*\}', raw, re.DOTALL)
+    if not match:
+        return "Não entendi. Pode tentar novamente?", None
+
+    data = json.loads(match.group())
 
     if data.get("not_a_transaction"):
         return data.get("reply", "Entendido!"), None
