@@ -2,7 +2,7 @@ import logging
 from fastapi import FastAPI
 
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import transactions, summary, webhook
+from app.routers import transactions, summary, webhook, categories
 
 logging.basicConfig(level=logging.INFO)
 
@@ -24,6 +24,7 @@ app.add_middleware(
 app.include_router(transactions.router)
 app.include_router(summary.router)
 app.include_router(webhook.router)
+app.include_router(categories.router)
 
 
 @app.get("/")

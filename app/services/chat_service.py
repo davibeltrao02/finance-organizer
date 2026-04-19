@@ -1,37 +1,40 @@
 from sqlalchemy.orm import Session
 from app.models.chat_message import ChatMessage
-# from app.services.ai import SYSTEM_PROMPT
 
-from app.models.transaction import Transaction
-from datetime import date, datetime
-    
-
-HISTORY_LIMIT = 10
+HISTORY_LIMIT = 20
 
 
-# def load_history(db: Session) -> list:
-#     """
-#     Busca as últimas mensagens do banco e converte para o formato
-#     que o Groq espera: lista de dicts com "role" e "content".
-#     """
-#     messages = (
-#         db.query(ChatMessage)
-#         .order_by(ChatMessage.created_at.desc())
-#         .limit(HISTORY_LIMIT)
-#         .all()
-#     )
-#     history = [
-#         {"role": msg.role, "content": msg.content}
-#         for msg in reversed(messages)
-#     ]
-#     system_turn = [
-#         {"role": "user", "content": "Instruções do sistema: " + SYSTEM_PROMPT},
-#         {"role": "assistant", "content": "Entendido! Estou pronto para registrar suas transações financeiras."},
-#     ]
-#     return system_turn + history
+def load_history(chat_id: int, db: Session) -> list:
+    """
+    Busca as últimas mensagens do banco e converte para o formato
+    que o Groq espera: lista de dicts com "role" e "content".
+    """
+    messages = (
+        db.query(ChatMessage)
+        .filter(ChatMessage.chat_id == chat_id)
+        .order_by(ChatMessage.created_at.desc())
+        .limit(HISTORY_LIMIT)
+        .all()
+    )
+    history = [{"role": msg.role, "content": msg.content} for msg in reversed(messages)]
+    return history
 
 
-def save_message(db: Session, role: str, content: str):
-    """Salva uma mensagem no histórico do banco."""
-    db.add(ChatMessage(role=role, content=content))
+def save_message(db: Session, role: str, content: str, chat_id: int):
+    db.add(ChatMessage(role=role, content=content, chat_id=chat_id))
+    delete_old_messages(db, chat_id)
     db.commit()
+
+
+def delete_old_messages(db: Session, chat_id: int):
+    subquery = (
+        db.query(ChatMessage.id)
+        .filter(ChatMessage.chat_id == chat_id)
+        .order_by(ChatMessage.created_at.desc())
+        .offset(HISTORY_LIMIT)
+        .subquery()
+        .as_scalar()
+    )
+    db.query(ChatMessage).filter(ChatMessage.id.in_(subquery)).delete(
+        synchronize_session=False
+    )

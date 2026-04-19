@@ -28,6 +28,14 @@ class TransactionResponse(TransactionCreate):
         from_attributes = True
 
 
+class TransactionUpdate(BaseModel):
+    description: Optional[str] = None
+    amount: Optional[float] = None
+    type: Optional[TransactionType] = None
+    category: Optional[str] = None
+    transaction_date: Optional[date] = None
+
+
 # Schema para receber a mensagem do chat
 class ChatMessage(BaseModel):
     message: str

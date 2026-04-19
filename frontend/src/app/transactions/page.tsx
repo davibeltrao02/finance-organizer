@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function SobrePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -20,10 +21,15 @@ export default function SobrePage() {
 
   return (
     <div>
-      <h1>Transações</h1>
+      <h1>
+        <Link href="/" className="text-blue-500">
+          Voltar
+        </Link>
+      </h1>
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Id</TableHead>
             <TableHead>Data</TableHead>
             <TableHead>Descrição</TableHead>
             <TableHead>Categoria</TableHead>
@@ -34,6 +40,7 @@ export default function SobrePage() {
         <TableBody>
           {transactions.map((t) => (
             <TableRow key={t.id}>
+              <TableCell>{t.id}</TableCell>
               <TableCell>
                 {new Date(t.transaction_date).toLocaleDateString("pt-BR")}
               </TableCell>
@@ -48,6 +55,14 @@ export default function SobrePage() {
                 }
               >
                 R$ {t.amount.toFixed(2)}
+              </TableCell>
+              <TableCell>
+                <Link
+                  href={`/transactions/${t.id}/edit`}
+                  className="text-blue-500"
+                >
+                  Editar
+                </Link>
               </TableCell>
             </TableRow>
           ))}

@@ -1,13 +1,16 @@
 import json
 import re
-import os
+
+from sqlalchemy.orm import Session
+
 from typing import Optional, Tuple
 from datetime import date
 from dotenv import load_dotenv
-from groq import Groq
 from app.schemas.transaction import TransactionExtracted
 from app.services.ai import call_groq
 from app.models.transaction import Transaction
+from app.services.chat_service import load_history
+from app.constants.categories import EXPENSE_CATEGORIES, INCOME_CATEGORIES
 
 load_dotenv()
 
@@ -25,7 +28,7 @@ Quando o usuário enviar uma mensagem descrevendo uma transação financeira, ex
   "transaction_date": "YYYY-MM-DD"
 }}
 
-Toda resposta deve seguir estritamente esse formato JSON, sem texto adicional. Se a mensagem do usuário não for sobre uma transação financeira, responda com um JSON indicando que não é uma transação.
+Toda resposta deve seguir estritamente esse formato JSON, sem texto adicional.
 Como preciso parsar a resposta da IA, é fundamental que o formato seja sempre o mesmo, sem variações.
 
 Para transaction_date:
@@ -34,8 +37,8 @@ Para transaction_date:
 - Se mencionar um dia específico, calcule a data correta
 - Se não mencionar data, use a data de hoje
 
-Categorias possíveis para expense: alimentação, transporte, moradia, saúde, lazer, educação, vestuário, outros
-Categorias possíveis para income: salário, freelance, investimentos, presente, outros
+Categorias possíveis para expense: {", ".join(EXPENSE_CATEGORIES)}
+Categorias possíveis para income: {", ".join(INCOME_CATEGORIES)}
 
 Se a mensagem NÃO for sobre uma transação financeira, responda com o JSON:
 {{"not_a_transaction": true, "reply": "sua resposta amigável aqui"}}
@@ -48,7 +51,9 @@ Exemplos:
 
 
 def parse_transaction(
+    chat_id: int,
     message: str,
+    db: Session
 ) -> Tuple[str, Optional[TransactionExtracted]]:
     """
     Envia a mensagem do usuário para o Groq com o histórico da conversa e retorna:
@@ -60,6 +65,9 @@ def parse_transaction(
     groq_message = []
     groq_message.append({"role": "system", "content": SYSTEM_PROMPT})
     groq_message.append({"role": "user", "content": message})
+
+    history_messages = load_history(chat_id, db)  # Carrega histórico do chat (ajuste conforme necessário)
+    groq_message = history_messages + groq_message  
 
     response = call_groq(groq_message)
 

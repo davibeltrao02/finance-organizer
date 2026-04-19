@@ -37,8 +37,13 @@ export async function getBalance(): Promise<Balance> {
   return res.json();
 }
 
-export async function getByCategory(year: number, month: number): Promise<CategoryTotal[]> {
-  const res = await fetch(`${API_URL}/summary/by-category?year=${year}&month=${month}`);
+export async function getByCategory(
+  year: number,
+  month: number,
+): Promise<CategoryTotal[]> {
+  const res = await fetch(
+    `${API_URL}/summary/by-category?year=${year}&month=${month}`,
+  );
   return res.json();
 }
 
@@ -54,4 +59,21 @@ export async function sendMessage(message: string): Promise<ChatResponse> {
     body: JSON.stringify({ message }),
   });
   return res.json();
+}
+
+export async function updateTransaction(
+  id: number,
+  data: Partial<Transaction>,
+): Promise<void> {
+  await fetch(`${API_URL}/transactions/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getCategories(type: TransactionType): Promise<string[]> {
+  const res = await fetch(`${API_URL}/categories/`);
+  const data = await res.json();
+  return type === "income" ? data.income : data.expense;
 }
